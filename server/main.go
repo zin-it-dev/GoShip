@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -12,14 +13,9 @@ import (
 type Post struct {
     ID     string  `json:"id"`
     Title  string  `json:"title"`
-    Artist string  `json:"artist"`
 }
 
-var posts = []Post{
-    {ID: "1", Title: "Blue Train", Artist: "John Coltrane"},
-    {ID: "2", Title: "Jeru", Artist: "Gerry Mulligan"},
-    {ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan"},
-}
+var posts []Post
 
 func getPosts(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, posts)
@@ -43,6 +39,16 @@ func main() {
   	if err != nil {
     	log.Fatal("Error loading .env file")
   	}
+
+	data, err := os.ReadFile("./data/posts.json")
+	if err != nil {
+		log.Fatalf("Error reading posts.json: %v", err)
+	}
+
+	err = json.Unmarshal(data, &posts)
+	if err != nil {
+		log.Fatalf("Error parsing posts.json: %v", err)
+	}
 
 	port := os.Getenv("PORT")
 
